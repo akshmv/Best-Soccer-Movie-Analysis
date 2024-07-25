@@ -90,6 +90,8 @@ To create an ETL pipeline that extracts the data from S3 bucket we need to set u
 
 ![image](https://github.com/user-attachments/assets/3ad97ab6-92d4-48cb-b35c-e0710ea3e46c)
 
+  4. The pipelines are monitored using Azure Monitor.
+
 ## 3. Transforming and Filtering the data using PySpark in Azure Databricks Workspace
   ### movies.csv File:
   1. The **_movieRank_** column is not ranked based on anything so we are not selecting that column.
@@ -106,6 +108,48 @@ To create an ETL pipeline that extracts the data from S3 bucket we need to set u
   6. In the dataset "**movies.csv** the movies were not rankes based on any particular column. So, we remove that column and rank the movies based on "**_critic_score_** column.
   7. After the above transformations are performed, we write the output to Azure Data Lake Storage Account.
 
+  ### critic_reviews.csv File:
+  1. While reading the data **critic_reviews.csv**, the read mode was set to "**FAILFAST**".
 
+```
+criticReviewLoadDF = spark.read\
+    .option("header",True)\
+    .option("inferSchema",True)\
+    .option("mode","FAILFAST")\
+    .csv("abfss://moviesdata@moviesdatastorageacc224.dfs.core.windows.net/critic_reviews.csv")
+```
 
+![image](https://github.com/user-attachments/assets/66a6eaa7-9a98-47b1-99e8-42b2ee49c86d)
+
+  2. So, while running the code failed indicating that the dataset has some kind of "malformed" data.
+  3. At this stage, we can either use the "**DROPMALFORMED**" mode or "**PERMISSIVE**" mode. If we used **_DROPMALFORMED_** we won't know which column or what the malformed data is. But if we used **_PERMISSIVE_** mode, we can collect our malformed data inside a column and if we don't require it we can drop that column later.
+  4. Finally, we are filtering our data because some columns had _null_ values.
+  5. After the above transformations are performed, we write the output to Azure Data Lake Storage Account.
+
+  ### user_reviews.csv File:
+  1. While reading the data **critic_reviews.csv**, the read mode was set to "**FAILFAST**".
+
+```
+userReviewLoadDF = spark.read\
+    .option("header",True)\
+    .option("inferSchema",True)\
+    .option("mode","FAILFAST")\
+    .csv("abfss://moviesdata@moviesdatastorageacc224.dfs.core.windows.net/user_reviews.csv")
+```
+
+![image](https://github.com/user-attachments/assets/5b8524fe-b772-4d50-9ac4-c21c1a12b321)
+
+  2. So, while running the code failed indicating that the dataset has some kind of "malformed" data.
+  3. At this stage, we can either use the "**DROPMALFORMED**" mode or "**PERMISSIVE**" mode. If we used **_DROPMALFORMED_** we won't know which column or what the malformed data is. But if we used **_PERMISSIVE_** mode, we can collect our malformed data inside a column and if we don't require it we can drop that column later.
+  4. After that we are filtering our data because some columns had _null_ values and then finally ordered them based on the "**rating**" column.
+  5. After the above transformations are performed, we write the output to Azure Data Lake Storage Account.
+
+## 4. Loading the data to Azure Synapse Analytics for further Analysis
+  1. The output stored in Azure Data Lake Storage are loaded into "**_Azure Synapse Workspace_**.
+  2. To do that, we need to first create an Azure Synapse Workspace.
+  3. Navigate to Azure Synapse Workspace and create a workspace.
+  4. While creating the workspace a Serverless SQL pool would have been created automatically.
+  5. Create a SQL Script and attach the Serveerless SQL pool. Now, we can perform SQL querying on the result datasets and perform further analysis.
+
+![image](https://github.com/user-attachments/assets/1d4fe269-fcd0-4c1f-b6f3-d6f7ed888ed9)
 
